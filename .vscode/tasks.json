@@ -1,0 +1,202 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🚀 Pré-démarrage complet",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "quick_start.py",
+                "start"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "options": {
+                "statusbar": {
+                    "label": "🚀 Pré-démarrage"
+                }
+            }
+        },
+        {
+            "label": "🐳 Démarrer Ollama avec Docker",
+            "type": "shell",
+            "command": "docker-compose",
+            "args": [
+                "up", 
+                "-d", 
+                "ollama"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "options": {
+                "statusbar": {
+                    "label": "🐳 Démarrer Ollama"
+                }
+            }
+        },
+        {
+            "label": "📦 Télécharger modèle granite4",
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                "exec",
+                "ollama",
+                "ollama",
+                "pull",
+                "granite4"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "dependsOn": "🐳 Démarrer Ollama avec Docker",
+            "options": {
+                "statusbar": {
+                    "label": "📦 Télécharger granite4"
+                }
+            }
+        },
+        {
+            "label": "🔄 Installer dépendances Python",
+            "type": "shell",
+            "command": "pip",
+            "args": [
+                "install",
+                "-r",
+                "requirements.txt"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "options": {
+                "statusbar": {
+                    "label": "🔄 Installer dépendances"
+                }
+            }
+        },
+        {
+            "label": "🚀 Setup complet (sans modèle)",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "🐳 Démarrer Ollama avec Docker",
+                "🔄 Installer dépendances Python"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "options": {
+                "statusbar": {
+                    "label": "🚀 Setup complet"
+                }
+            }
+        },
+        {
+            "label": "🌐 Ouvrir interface web",
+            "type": "shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "start",
+                "http://localhost:8000"
+            ],
+            "windows": {
+                "command": "cmd",
+                "args": ["/c", "start", "http://localhost:8000"]
+            },
+            "linux": {
+                "command": "xdg-open",
+                "args": ["http://localhost:8000"]
+            },
+            "osx": {
+                "command": "open",
+                "args": ["http://localhost:8000"]
+            },
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🤖 Lancer l'application chatbot",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-m",
+                "uvicorn",
+                "src.main:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000",
+                "--reload"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}"
+                },
+                "statusbar": {
+                    "label": "🤖 Application démarrée"
+                }
+            },
+            "dependsOn": "🔄 Installer dépendances Python"
+        },
+        {
+            "label": "🛑 Arrêter tous les services Docker",
+            "type": "shell",
+            "command": "docker-compose",
+            "args": [
+                "down"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "options": {
+                "statusbar": {
+                    "label": "🛑 Arrêter services"
+                }
+            }
+        }
+    ]
+}

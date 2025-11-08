@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-vscode.vscode-json",
+        "ms-vscode-remote.remote-containers",
+        "ms-azuretools.vscode-docker",
+        "bradlc.vscode-tailwindcss",
+        "ms-python.flake8",
+        "ms-python.autopep8"
+    ]
+}

@@ -1,0 +1,27 @@
+{
+  "servers": {
+    "MCP_DOCKER": {
+      "command": "docker",
+      "args": [
+        "mcp",
+        "gateway",
+        "run"
+      ],
+      "type": "stdio"
+    }
+  },
+  "quickActions": [
+    {
+      "label": "🚀 Démarrer Chatbot",
+      "task": "🚀 Setup complet (Docker + Python)"
+    },
+    {
+      "label": "🌐 Ouvrir Interface",
+      "task": "🌐 Ouvrir interface web"
+    },
+    {
+      "label": "🛑 Arrêter Services",
+      "task": "🛑 Arrêter tous les services Docker"
+    }
+  ]
+}

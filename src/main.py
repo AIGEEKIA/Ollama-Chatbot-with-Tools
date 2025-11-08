@@ -6,21 +6,17 @@ import httpx
 import os
 import json
 from typing import List, Optional, Dict, Any
-from tools.tool_manager import ToolManager
 import asyncio
 from dotenv import load_dotenv
 
 # Charger les variables d'environnement
 load_dotenv()
 
-app = FastAPI(title="Ollama Chatbot with Tools", version="1.0.0")
+app = FastAPI(title="Ollama Chatbot", version="1.0.0")
 
 # Configuration
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 MODEL_NAME = os.getenv("MODEL_NAME", "granite4:latest")
-
-# Initialisation du gestionnaire d'outils
-tool_manager = ToolManager()
 
 class ChatMessage(BaseModel):
     role: str
@@ -30,12 +26,10 @@ class ChatRequest(BaseModel):
     messages: List[Dict[str, str]]  # Changer pour accepter des dicts directement
     model: Optional[str] = MODEL_NAME
     stream: Optional[bool] = False
-    use_tools: Optional[bool] = True
 
 class ChatResponse(BaseModel):
     response: str
     model: str
-    tools_used: List[str] = []
 
 @app.on_event("startup")
 async def startup_event():
@@ -67,7 +61,7 @@ async def get_chat_interface():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Ollama Chatbot with Tools</title>
+        <title>Ollama Chatbot</title>
         <meta charset="utf-8">
         <style>
             body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
@@ -88,8 +82,8 @@ async def get_chat_interface():
     </head>
     <body>
         <div class="container">
-            <h1>🤖 Ollama Chatbot with Tools</h1>
-            
+            <h1>🤖 Ollama Chatbot</h1>
+
             <!-- Section de sélection de modèle -->
             <div class="model-selector">
                 <label for="modelSelect">Modèle Ollama :</label>
@@ -98,30 +92,24 @@ async def get_chat_interface():
                 </select>
                 <span id="currentModel">Modèle actuel: granite4:latest</span>
             </div>
-            
+
             <div class="chat-container" id="chatContainer"></div>
             <div class="input-container">
                 <input type="text" id="messageInput" placeholder="Tapez votre message..." onkeypress="handleKeyPress(event)">
                 <button onclick="sendMessage()">Envoyer</button>
             </div>
-            <div class="tools-info" id="toolsInfo"></div>
         </div>
 
         <script>
             let chatHistory = [];
 
-            function addMessage(role, content, toolsUsed = []) {
+            function addMessage(role, content) {
                 const chatContainer = document.getElementById('chatContainer');
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${role}-message`;
                 messageDiv.innerHTML = content.replace(/\\n/g, '<br>');
                 chatContainer.appendChild(messageDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
-                
-                if (toolsUsed.length > 0) {
-                    const toolsInfo = document.getElementById('toolsInfo');
-                    toolsInfo.innerHTML = `🔧 Outils utilisés: ${toolsUsed.join(', ')}`;
-                }
             }
 
             async function sendMessage() {
@@ -138,13 +126,12 @@ async def get_chat_interface():
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
-                            messages: chatHistory,
-                            use_tools: true
+                            messages: chatHistory
                         })
                     });
 
                     const data = await response.json();
-                    addMessage('bot', data.response, data.tools_used);
+                    addMessage('bot', data.response);
                     chatHistory.push({role: 'assistant', content: data.response});
                 } catch (error) {
                     addMessage('bot', 'Erreur: ' + error.message);
@@ -217,7 +204,7 @@ async def get_chat_interface():
             loadModels();
 
             // Message de bienvenue
-            addMessage('bot', 'Bonjour! Je suis un chatbot alimenté par Ollama avec des outils intégrés. Sélectionnez un modèle ci-dessus et posez-moi vos questions!');
+            addMessage('bot', 'Bonjour! Je suis un chatbot alimenté par Ollama. Sélectionnez un modèle ci-dessus et posez-moi vos questions!');
         </script>
     </body>
     </html>
@@ -226,53 +213,30 @@ async def get_chat_interface():
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    """Endpoint principal pour le chat avec gestion des outils"""
+    """Endpoint principal pour le chat"""
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:
-            # Préparer le prompt avec les outils disponibles si demandé
-            messages = request.messages.copy()
-            tools_used = []
-            
-            if request.use_tools:
-                # Ajouter les informations sur les outils disponibles
-                tools_info = tool_manager.get_tools_description()
-                system_message = {
-                    "role": "system",
-                    "content": f"""Tu es un assistant IA avec accès aux outils suivants:
-{tools_info}
-
-Si l'utilisateur demande quelque chose que tu peux accomplir avec ces outils, utilise-les en indiquant clairement dans ta réponse quel outil tu utilises et avec quels paramètres.
-Format pour utiliser un outil: [TOOL:nom_outil:paramètres_json]"""
-                }
-                messages.insert(0, system_message)
-            
             # Appel à Ollama
             ollama_response = await client.post(
                 f"{OLLAMA_BASE_URL}/api/chat",
                 json={
                     "model": request.model,
-                    "messages": messages,
+                    "messages": request.messages,
                     "stream": False
                 }
             )
-            
+
             if ollama_response.status_code != 200:
                 raise HTTPException(status_code=500, detail=f"Erreur Ollama: {ollama_response.text}")
-            
+
             response_data = ollama_response.json()
             bot_response = response_data["message"]["content"]
-            
-            # Traitement des outils dans la réponse
-            if request.use_tools:
-                bot_response, used_tools = await tool_manager.process_response(bot_response)
-                tools_used.extend(used_tools)
-            
+
             return ChatResponse(
                 response=bot_response,
-                model=request.model,
-                tools_used=tools_used
+                model=request.model
             )
-            
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -326,11 +290,6 @@ async def select_model(model_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur sélection modèle: {str(e)}")
 
-@app.get("/tools")
-async def get_available_tools():
-    """Récupère la liste des outils disponibles"""
-    return tool_manager.get_tools_info()
-
 @app.get("/health")
 async def health_check():
     """Vérification de santé du service"""
@@ -339,8 +298,7 @@ async def health_check():
             ollama_response = await client.get(f"{OLLAMA_BASE_URL}/api/tags")
             return {
                 "status": "healthy",
-                "ollama_status": "connected" if ollama_response.status_code == 200 else "disconnected",
-                "tools_available": len(tool_manager.tools)
+                "ollama_status": "connected" if ollama_response.status_code == 200 else "disconnected"
             }
     except Exception as e:
         return {

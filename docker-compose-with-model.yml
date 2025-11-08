@@ -1,14 +1,16 @@
 version: '3.8'
 
+# Version avec modèle pré-téléchargé (image plus lourde, démarrage plus rapide)
 services:
   ollama:
-    image: ollama/ollama:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
     container_name: ollama
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-      - ./init-ollama.sh:/init-ollama.sh
     restart: unless-stopped
     environment:
       - OLLAMA_HOST=0.0.0.0
@@ -17,7 +19,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    command: ["/bin/bash", "-c", "ollama serve & sleep 5 && /init-ollama.sh && wait"]
 
   chatbot:
     build: .

@@ -94,23 +94,29 @@ Ce projet implémente un **chatbot intelligent** utilisant **Ollama en local** a
 
 Quand vous avez trouvé le modèle idéal :
 
-1. **Modifier la configuration**
+#### Option A : Déploiement Rapide (Recommandé)
 
-   ```bash
-   # Dans .env, changer le modèle choisi
-   MODEL_NAME=granite4:latest  # ou votre modèle préféré
-   ```
+```bash
+# Modèle téléchargé automatiquement au premier démarrage
+docker-compose up -d
+# ⏳ Première fois : téléchargement du modèle (~2-3 min)
+# ✅ Démarrages suivants : instantané
+```
 
-2. **Builder l'app autonome**
+#### Option B : Image avec Modèle Pré-chargé
 
-   ```bash
-   docker-compose up --build -d
-   ```
+```bash
+# Image plus lourde mais démarrage instantané
+docker-compose -f docker-compose-with-model.yml up --build -d
+# ⏳ Build initial : téléchargement du modèle dans l'image
+# ✅ Tous les démarrages suivants : instantané
+```
 
-3. **L'app démarre automatiquement avec :**
-   - Ollama + votre modèle dans un container
-   - Interface web sur [http://localhost:8000](http://localhost:8000)
-   - Tout isolé et portable !
+**Les deux options donnent le même résultat :**
+
+- Ollama + modèle granite4 dans un container
+- Interface web sur [http://localhost:8000](http://localhost:8000)
+- Tout isolé et portable !
 
 ## 💬 Utilisation
 

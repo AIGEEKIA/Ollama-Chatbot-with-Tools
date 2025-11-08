@@ -1,0 +1,11 @@
+FROM ollama/ollama:latest
+
+# Copier le script d'initialisation
+COPY init-ollama.sh /init-ollama.sh
+RUN chmod +x /init-ollama.sh
+
+# Exposer le port
+EXPOSE 11434
+
+# Commande de démarrage : Ollama + initialisation du modèle
+CMD ["/bin/bash", "-c", "ollama serve & sleep 5 && /init-ollama.sh && wait"]

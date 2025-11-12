@@ -1,40 +1,76 @@
-# 🤖 Chatbot Ollama avec Outils LLM - Test & Déploiement Autonome
+# Ollama Chatbot# 🤖 Chatbot Ollama avec Outils LLM - Test & Déploiement Autonome
 
-Ce projet implémente un **chatbot intelligent** utilisant **Ollama en local** avec des **outils intégrés** et un **workflow en deux phases** : test local puis déploiement autonome avec Docker.
 
-## 🎯 Workflow en 2 Phases
 
-### Phase 1 : Test & Développement 🔬
+Un chatbot simple utilisant Ollama pour l'IA locale et cloud.Ce projet implémente un **chatbot intelligent** utilisant **Ollama en local** avec des **outils intégrés** et un **workflow en deux phases** : test local puis déploiement autonome avec Docker.
 
-- Utilise votre **Ollama local** pour tester différents modèles
-- Interface web pour développement et tests
-- Changement rapide de modèles via `.env`
+
+
+## Installation## 🎯 Workflow en 2 Phases
+
+
+
+1. Installez Ollama : https://ollama.com### Phase 1 : Test & Développement 🔬
+
+2. Installez les dépendances Python :
+
+   ```bash- Utilise votre **Ollama local** pour tester différents modèles
+
+   pip install -r requirements.txt- Interface web pour développement et tests
+
+   ```- Changement rapide de modèles via `.env`
+
 - VS Code intégré avec tâches automatisées
+
+## Utilisation
 
 ### Phase 2 : Production Autonome 📦
 
-- Tout packagé dans **Docker** pour déploiement portable
-- Modèle choisi "figé" dans l'image
-- App complètement autonome et isolée
+1. Lancez Ollama :
 
-## 🚀 Fonctionnalités
+   ```bash- Tout packagé dans **Docker** pour déploiement portable
 
-- **🧠 Chatbot local** : Utilise Ollama pour faire tourner des LLM localement (pas de cloud)
-- **🛠️ Outils intégrés** : Calculator, Weather, File explorer, Web search
+   ollama serve- Modèle choisi "figé" dans l'image
+
+   ```- App complètement autonome et isolée
+
+
+
+2. Installez un modèle :## 🚀 Fonctionnalités
+
+   ```bash
+
+   ollama pull llama3.2:latest- **🧠 Chatbot local** : Utilise Ollama pour faire tourner des LLM localement (pas de cloud)
+
+   ```- **🛠️ Outils intégrés** : Calculator, Weather, File explorer, Web search
+
 - **🌐 Interface web moderne** : Sélection de modèle, historique des conversations
-- **🐳 Docker Ready** : Configuration complète pour déploiement autonome
-- **🔧 VS Code intégré** : Tâches automatisées, débogage, tests
-- **📱 API REST** : Endpoints pour intégration dans d'autres apps
+
+3. Lancez le chatbot :- **🐳 Docker Ready** : Configuration complète pour déploiement autonome
+
+   ```bash- **🔧 VS Code intégré** : Tâches automatisées, débogage, tests
+
+   python -m uvicorn src.main:app --host 127.0.0.1 --port 8000- **📱 API REST** : Endpoints pour intégration dans d'autres apps
+
+   ```
 
 ## 🛠️ Outils Disponibles
 
-| Outil | Commande | Description |
-|-------|----------|-------------|
-| **Calculator** | `calc: 2+3*4` | Calculs mathématiques avancés |
-| **Weather** | `weather: Paris` | Infos météo (API simulée) |
-| **File** | `file: list .` | Exploration de fichiers |
-| **Search** | `search: python tutorial` | Recherche web simulée |
+4. Ouvrez http://127.0.0.1:8000 dans votre navigateur
 
+| Outil | Commande | Description |
+
+## Fonctionnalités|-------|----------|-------------|
+
+| **Calculator** | `calc: 2+3*4` | Calculs mathématiques avancés |
+
+- Chat avec les modèles Ollama locaux| **Weather** | `weather: Paris` | Infos météo (API simulée) |
+
+- Support des modèles cloud (avec `ollama login`)| **File** | `file: list .` | Exploration de fichiers |
+
+- Interface web simple| **Search** | `search: python tutorial` | Recherche web simulée |
+
+- Sélection de modèle en temps réel
 ## 📋 Prérequis
 
 - **Docker & Docker Compose** (obligatoire)

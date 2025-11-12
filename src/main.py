@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from starlette.requests import Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -265,29 +266,33 @@ async def get_models():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur récupération modèles: {str(e)}")
 
+class ModelSelectRequest(BaseModel):
+    model_name: str
+
 @app.post("/models/select")
-async def select_model(model_name: str):
+async def select_model(request: ModelSelectRequest):
     """Sélectionne un modèle pour les futures conversations"""
     try:
+        model_name = request.model_name
+
         async with httpx.AsyncClient(timeout=10.0) as client:
             # Vérifier que le modèle existe
             response = await client.get(f"{OLLAMA_BASE_URL}/api/tags")
             if response.status_code == 200:
                 models_data = response.json()
                 available_models = [model["name"] for model in models_data.get("models", [])]
-                
+
                 if model_name in available_models:
                     # Mettre à jour la variable globale (dans un vrai projet, utiliser une config persistante)
                     global MODEL_NAME
                     MODEL_NAME = model_name
                     return {"success": True, "selected_model": model_name, "message": f"Modèle {model_name} sélectionné"}
                 else:
-                    raise HTTPException(status_code=404, detail=f"Modèle {model_name} non trouvé")
+                    return {"success": False, "message": f"Modèle '{model_name}' non trouvé"}
             else:
-                raise HTTPException(status_code=503, detail="Ollama service not available")
-    except HTTPException:
-        raise
+                return {"success": False, "message": "Service Ollama non disponible"}
     except Exception as e:
+        return {"success": False, "message": f"Erreur: {str(e)}"}
         raise HTTPException(status_code=500, detail=f"Erreur sélection modèle: {str(e)}")
 
 @app.get("/health")
@@ -308,4 +313,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8002)
